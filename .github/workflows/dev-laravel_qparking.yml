@@ -29,7 +29,7 @@ jobs:
       uses: docker/build-push-action@v2
       with:
         push: true
-        tags: qparking.azurecr.io/${{ secrets.AzureAppService_ContainerUsername_e2bd9ec8a6c248d88aa12a5e404e0d54 }}/qparking:${{ github.sha }}
+        tags: qparking.azurecr.io/qparking:latest
         file: ./Dockerfile
 
   deploy:
@@ -47,4 +47,4 @@ jobs:
         app-name: 'qparking'
         slot-name: 'production'
         publish-profile: ${{ secrets.AzureAppService_PublishProfile_de1fe5f6debe4582b3b37099f171f470 }}
-        images: 'qparking.azurecr.io/${{ secrets.AzureAppService_ContainerUsername_e2bd9ec8a6c248d88aa12a5e404e0d54 }}/qparking:${{ github.sha }}'
+        images: 'qparking.azurecr.io/qparking:latest'
