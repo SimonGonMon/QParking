@@ -44,6 +44,10 @@ Route::group(['namespace' => 'App\Http\Controllers'], function()
 
         Route::post('/services/register', 'ServiceController@registerVehicle')->name('services.register');
 
+        Route::post('/services/generate-payment', 'ServiceController@generatePayment')->name('services.generate-payment');
+
+        Route::post('/services/generate-qr', 'ServiceController@generateQR')->name('services.generate-qr');
+
 
     });
 });
