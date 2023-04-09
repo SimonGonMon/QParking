@@ -18,8 +18,11 @@ class ServiceController extends Controller
 
         // Si la consulta anterior retorna una entrada, significa que el vehículo ya está estacionado. En ese caso, retornar un error.
         if ($service) {
+
             return back()->with('error', 'Este vehículo ya se encuentra estacionado.');
         }
+
+
 
         // Si no se encuentra ninguna entrada en la tabla services con la misma placa, se puede insertar una nueva entrada en la tabla.
         $service = new Service;
@@ -28,6 +31,9 @@ class ServiceController extends Controller
         $service->status = "active";
         $service->time_start = now();
         $service->save();
+        
+        return back()->with('success', 'Vehículo registrado exitosamente.');
+
 
         // Resto del código de la función
     }
