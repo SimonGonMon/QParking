@@ -16,7 +16,7 @@
         @endauth
     </div>
 
-{{--    Modal Registrar Vehículo--}}
+    {{--    Modal Registrar Vehículo--}}
     <div class="modal fade" id="modal-register" tabindex="-1" aria-labelledby="modal-register" aria-hidden="true">
         <div class="modal-dialog">
             <div class="modal-content">
@@ -29,14 +29,17 @@
                     <div class="modal-body">
                         <div class="mb-3">
                             <label for="user_id" class="form-label">Cedula de Ciudadania</label>
-                            <input type="text" class="form-control" id="user_id" name="user_id" pattern="[0-9]{1,10}" maxlength="10">
+                            <input type="text" class="form-control" id="user_id" name="user_id" pattern="[0-9]{1,10}"
+                                   maxlength="10">
                             <div id="emailHelp" class="form-text">Debe contener números únicamente.</div>
 
                         </div>
 
                         <div class="mb-3">
                             <label for="plate" class="form-label">Placa Vehicular</label>
-                            <input type="text" class="form-control" id="plate" name="plate" pattern="([A-Za-z]{3}\d{2}[A-Za-z]{1})|([A-Za-z]{3}\d{3})" maxlength="6" minlength="5">
+                            <input type="text" class="form-control" id="plate" name="plate"
+                                   pattern="([A-Za-z]{3}\d{2}[A-Za-z]{1})|([A-Za-z]{3}\d{3})" maxlength="6"
+                                   minlength="5">
                             <div id="emailHelp" class="form-text">La placa debe tener el formato ABC123 o ABC12D.</div>
                         </div>
                     </div>
@@ -62,7 +65,9 @@
                     <div class="modal-body">
                         <div class="mb-3">
                             <label for="plate" class="form-label">Placa Vehicular</label>
-                            <input type="text" class="form-control" id="plate" name="plate" pattern="([A-Za-z]{3}\d{2}[A-Za-z]{1})|([A-Za-z]{3}\d{3})" maxlength="6" minlength="5">
+                            <input type="text" class="form-control" id="plate" name="plate"
+                                   pattern="([A-Za-z]{3}\d{2}[A-Za-z]{1})|([A-Za-z]{3}\d{3})" maxlength="6"
+                                   minlength="5">
                             <div id="emailHelp" class="form-text">La placa debe tener el formato ABC123 o ABC12D.</div>
                         </div>
                         <div id="tabla-servicios"></div>
@@ -122,9 +127,15 @@
         </form>
     @endif
 
-{{--    al presionar el boton Generar QR se debe hacer una solicitud a una API que devolvera una imagen QR que sera mostrada en la vista--}}
     @if(session('routeQr'))
-        <img src="{{ session('routeQr') }}" alt="QR">
+        <h1 class="mt-5">QR de Pago</h1>
+        <hr>
+        <div class="d-flex justify-content-center">
+            <img src="{{ session('routeQr') }}" alt="QR de Pago">
+        </div>
+
+
+{{--        add the image in a div  aligned to the center with a little gap --}}
     @endif
 
     @if(session('data'))
@@ -135,8 +146,6 @@
         {{ session()->forget('routeQr') }}
     @endif
 @endsection
-
-{{--crea un script para hacer la solicitud a la api mediante una funcion en ServiceController con el boton Generar QR--}}
 
 @push('scripts')
     <script>
