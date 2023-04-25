@@ -38,7 +38,7 @@ class ServiceController extends Controller
         $service->time_start = now();
         $service->save();
 
-        return back()->with('success', 'Vehículo registrado exitosamente. \nPlaca: ' . $plate .'\nFecha y Hora: ' . now());
+        return back()->with('success', 'Vehículo registrado exitosamente. - Placa: ' . $plate .' - Fecha y Hora: ' . now());
     }
 
     public function registerVehicleFile(Request $request) {
@@ -55,12 +55,20 @@ class ServiceController extends Controller
 
         $plateRecognizerResponse = $this->API_PlateRecognizer($encodedImage);
 
+        dump($plateRecognizerResponse);
+
+//        check if array is empty
+
+        if (empty(json_decode($plateRecognizerResponse, true)['results'])) {
+            return back()->with('error', 'No se pudo reconocer la placa. Por favor, intente de nuevo.');
+        }
+
         $recognizedPlate = json_decode($plateRecognizerResponse, true)['results'][0]['plate'];
         $recognizedPlateScore = json_decode($plateRecognizerResponse, true)['results'][0]['score'];
         $recognizedPlate = strtoupper($recognizedPlate);
 
         if ($recognizedPlateScore <= 0.5) {
-            return back()->with('error', 'No se pudo reconocer la placa. Por favor, intente de nuevo. \n\nRESPUESTA API\nPlaca: ' . $plateRecognizerResponse.'\nConfiabilidad Predicción: ' . $recognizedPlateScore);
+            return back()->with('error', 'No se pudo reconocer la placa. Por favor, intente de nuevo. - RESPUESTA API - Placa: ' . $plateRecognizerResponse.' - Confiabilidad Predicción: ' . $recognizedPlateScore);
         }
 
 
@@ -81,7 +89,7 @@ class ServiceController extends Controller
         $service->time_start = now();
         $service->save();
 
-        return back()->with('success', 'Vehículo registrado exitosamente. \nPlaca: ' . $recognizedPlate .'\nFecha y Hora: ' . now());
+        return back()->with('success', 'Vehículo registrado exitosamente. - Placa: ' . $recognizedPlate .' - Fecha y Hora: ' . now().' - Confiabilidad Predicción: ' . $recognizedPlateScore);
 
 
 
