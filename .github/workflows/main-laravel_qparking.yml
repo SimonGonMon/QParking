@@ -22,14 +22,14 @@ jobs:
       uses: docker/login-action@v1
       with:
         registry: https://qparking.azurecr.io/
-        username: ${{ secrets.AzureAppService_ContainerUsername_e2bd9ec8a6c248d88aa12a5e404e0d54 }}
-        password: ${{ secrets.AzureAppService_ContainerPassword_e2f0e33aeec44657bb9d3af01760288f }}
+        username: ${{ secrets.AzureAppService_ContainerUsername_cf8e431938a24376a959fddf42c7a4e2 }}
+        password: ${{ secrets.AzureAppService_ContainerPassword_cb40f973d977448c9d731d2d668fe37b }}
 
     - name: Build and push container image to registry
       uses: docker/build-push-action@v2
       with:
         push: true
-        tags: qparking.azurecr.io/${{ secrets.AzureAppService_ContainerUsername_e2bd9ec8a6c248d88aa12a5e404e0d54 }}/qparking:${{ github.sha }}
+        tags: qparking.azurecr.io/${{ secrets.AzureAppService_ContainerUsername_cf8e431938a24376a959fddf42c7a4e2 }}/qparking:${{ github.sha }}
         file: ./Dockerfile
 
   deploy:
@@ -46,5 +46,5 @@ jobs:
       with:
         app-name: 'qparking'
         slot-name: 'production'
-        publish-profile: ${{ secrets.AzureAppService_PublishProfile_de1fe5f6debe4582b3b37099f171f470 }}
-        images: 'qparking.azurecr.io/${{ secrets.AzureAppService_ContainerUsername_e2bd9ec8a6c248d88aa12a5e404e0d54 }}/qparking:${{ github.sha }}'
+        publish-profile: ${{ secrets.AzureAppService_PublishProfile_a0fc7303ce264418824e5e5ff6e6290a }}
+        images: 'qparking.azurecr.io/${{ secrets.AzureAppService_ContainerUsername_cf8e431938a24376a959fddf42c7a4e2 }}/qparking:${{ github.sha }}'
