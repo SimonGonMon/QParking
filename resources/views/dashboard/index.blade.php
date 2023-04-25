@@ -7,16 +7,21 @@
             <p class="lead">Gracias Envigado.</p>
 
             <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modal-register">
-                Registrar Vehículo
+                Registrar Vehículo (Manual)
+            </button>
+
+            <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modal-register-file">
+                Registrar Vehiculo (Foto)
             </button>
 
             <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modal-payment">
                 Generar Cobro
             </button>
+
         @endauth
     </div>
 
-    {{--    Modal Registrar Vehículo--}}
+    {{--    Modal Registrar Vehículo (manual)--}}
     <div class="modal fade" id="modal-register" tabindex="-1" aria-labelledby="modal-register" aria-hidden="true">
         <div class="modal-dialog">
             <div class="modal-content">
@@ -24,13 +29,13 @@
                     <h1 class="modal-title fs-5" id="exampleModalLabel">Registrar Vehículo</h1>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
-                <form method="POST" action="{{ route('services.register') }}">>
+                <form method="POST" action="{{ route('services.register') }}">
                     @csrf
                     <div class="modal-body">
                         <div class="mb-3">
                             <label for="user_id" class="form-label">Cedula de Ciudadania</label>
                             <input type="text" class="form-control" id="user_id" name="user_id" pattern="[0-9]{1,10}"
-                                   maxlength="10">
+                                   maxlength="10" required>
                             <div id="emailHelp" class="form-text">Debe contener números únicamente.</div>
 
                         </div>
@@ -39,7 +44,7 @@
                             <label for="plate" class="form-label">Placa Vehicular</label>
                             <input type="text" class="form-control" id="plate" name="plate"
                                    pattern="([A-Za-z]{3}\d{2}[A-Za-z]{1})|([A-Za-z]{3}\d{3})" maxlength="6"
-                                   minlength="5">
+                                   minlength="5" required>
                             <div id="emailHelp" class="form-text">La placa debe tener el formato ABC123 o ABC12D.</div>
                         </div>
                     </div>
@@ -52,6 +57,40 @@
         </div>
     </div>
 
+    {{--    Modal Registrar Vehículo (archivo)--}}
+    <div class="modal fade" id="modal-register-file" tabindex="-1" aria-labelledby="modal-register-file" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h1 class="modal-title fs-5" id="exampleModalLabel">Registrar Vehículo (Foto)</h1>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <form method="POST" enctype="multipart/form-data" action="{{ route('services.register-file') }}">
+                    @csrf
+                    <div class="modal-body">
+                        <div class="mb-3">
+                            <label for="user_id" class="form-label">Cedula de Ciudadania</label>
+                            <input type="text" class="form-control" id="user_id" name="user_id" pattern="[0-9]{1,10}"
+                                   maxlength="10" required>
+                            <div id="emailHelp" class="form-text">Debe contener números únicamente.</div>
+
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="plate" class="form-label">Placa Vehicular</label>
+                            <input type="file" class="form-control" id="plate-image" name="plate-image" accept=".png,.jpg"  required >
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+                        <button type="submit" class="btn btn-primary">Registrar</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+
     {{-- Modal Generar Cobro --}}
     <div class="modal fade" id="modal-payment" tabindex="-1" aria-labelledby="modal-payment" aria-hidden="true">
         <div class="modal-dialog">
@@ -60,14 +99,14 @@
                     <h1 class="modal-title fs-5" id="exampleModalLabel">Generar Cobro</h1>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
-                <form method="POST" action="{{ route('services.generate-payment') }}">>
+                <form method="POST" action="{{ route('services.generate-payment') }}">
                     @csrf
                     <div class="modal-body">
                         <div class="mb-3">
                             <label for="plate" class="form-label">Placa Vehicular</label>
                             <input type="text" class="form-control" id="plate" name="plate"
                                    pattern="([A-Za-z]{3}\d{2}[A-Za-z]{1})|([A-Za-z]{3}\d{3})" maxlength="6"
-                                   minlength="5">
+                                   minlength="5" required>
                             <div id="emailHelp" class="form-text">La placa debe tener el formato ABC123 o ABC12D.</div>
                         </div>
                         <div id="tabla-servicios"></div>

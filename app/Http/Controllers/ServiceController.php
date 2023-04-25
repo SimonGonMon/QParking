@@ -17,6 +17,9 @@ class ServiceController extends Controller
         // Obtener la placa ingresada por el usuario desde la solicitud HTTP
         $plate = $request->input('plate');
 
+//        uppercase the plate
+        $plate = strtoupper($plate);
+
         // Verificar si existe una entrada en la tabla services con la misma placa
         $service = Service::where('plate', $plate)->first();
 
@@ -35,16 +38,87 @@ class ServiceController extends Controller
         $service->time_start = now();
         $service->save();
 
-        return back()->with('success', 'Vehículo registrado exitosamente.');
+        return back()->with('success', 'Vehículo registrado exitosamente. \nPlaca: ' . $plate .'\nFecha y Hora: ' . now());
+    }
+
+    public function registerVehicleFile(Request $request) {
+        // Obtener la placa ingresada por el usuario desde la solicitud HTTP
+        $rawImage = $request->file('plate-image');
+        $imageType = $rawImage->getMimeType();
+
+//        get file name and then delete it
 
 
-        // Resto del código de la función
+
+        $rawImageContents = file_get_contents($rawImage);
+        $encodedImage = 'data:' . $imageType . ';base64,' . base64_encode($rawImageContents);
+
+        $plateRecognizerResponse = $this->API_PlateRecognizer($encodedImage);
+
+        $recognizedPlate = json_decode($plateRecognizerResponse, true)['results'][0]['plate'];
+        $recognizedPlateScore = json_decode($plateRecognizerResponse, true)['results'][0]['score'];
+        $recognizedPlate = strtoupper($recognizedPlate);
+
+        if ($recognizedPlateScore <= 0.5) {
+            return back()->with('error', 'No se pudo reconocer la placa. Por favor, intente de nuevo. \n\nRESPUESTA API\nPlaca: ' . $plateRecognizerResponse.'\nConfiabilidad Predicción: ' . $recognizedPlateScore);
+        }
+
+
+        // Verificar si existe una entrada en la tabla services con la misma placa
+        $service = Service::where('plate', $recognizedPlate)->first();
+
+        // Si la consulta anterior retorna una entrada, significa que el vehículo ya está estacionado. En ese caso, retornar un error.
+        if ($service) {
+
+            return back()->with('error', 'Este vehículo ya se encuentra estacionado.');
+        }
+
+        // Si no se encuentra ninguna entrada en la tabla services con la misma placa, se puede insertar una nueva entrada en la tabla.
+        $service = new Service;
+        $service->user_id = $request->input('user_id');
+        $service->plate = $recognizedPlate;
+        $service->status = "active";
+        $service->time_start = now();
+        $service->save();
+
+        return back()->with('success', 'Vehículo registrado exitosamente. \nPlaca: ' . $recognizedPlate .'\nFecha y Hora: ' . now());
+
+
+
+
+
+
+
+
+        // Verificar si existe una entrada en la tabla services con la misma placa
+//        $service = Service::where('plate', $plate)->first();
+//
+//        // Si la consulta anterior retorna una entrada, significa que el vehículo ya está estacionado. En ese caso, retornar un error.
+//        if ($service) {
+//
+//            return back()->with('error', 'Este vehículo ya se encuentra estacionado.');
+//        }
+//
+//
+//        // Si no se encuentra ninguna entrada en la tabla services con la misma placa, se puede insertar una nueva entrada en la tabla.
+//        $service = new Service;
+//        $service->user_id = $request->input('user_id');
+//        $service->plate = $plate;
+//        $service->status = "active";
+//        $service->time_start = now();
+//        $service->save();
+//
+//        return back()->with('success', 'Vehículo registrado exitosamente.');
+
     }
 
     public function generatePayment(Request $request)
     {
         // Obtener la placa ingresada por el usuario desde la solicitud HTTP
         $plate = $request->input('plate');
+
+//        uppercase the plate
+        $plate = strtoupper($plate);
 
         // Verificar si existe una entrada en la tabla services con la misma placa
         $service = Service::where('plate', $plate)->first();
@@ -137,9 +211,9 @@ class ServiceController extends Controller
 
         $description = "Pago de parqueadero para la placa $licensePlate\n$elapsedTime";
 
-        $payResponse = $this->newPayLink($title, $description, $price);
+        $payResponse = $this->API_ePaycoGenerateLink($title, $description, $price);
 
-        dump($payResponse);
+//        dump($payResponse);
 
 //        if key titleResponse == Error return with error with string key textResponse
 
@@ -177,7 +251,7 @@ class ServiceController extends Controller
 
     }
 
-    function getApiToken()
+    public function API_ePaycoGetApiToken()
     {
         $curl = curl_init();
 
@@ -206,7 +280,7 @@ class ServiceController extends Controller
         return $token;
     }
 
-    function newPayLink($title, $description, $amount)
+    public function API_ePaycoGenerateLink($title, $description, $amount)
     {
         $curl = curl_init();
         curl_setopt_array($curl, array(
@@ -231,7 +305,7 @@ class ServiceController extends Controller
         }',
             CURLOPT_HTTPHEADER => array(
                 'Content-Type: application/json',
-                'Authorization: Bearer ' . $this->getApiToken()
+                'Authorization: Bearer ' . $this->API_ePaycoGetApiToken()
 
             ),
         ));
@@ -248,5 +322,32 @@ class ServiceController extends Controller
         return $response;
 
     }
+
+    public function API_PlateRecognizer($imageSource) {
+        $data = array(
+            'upload' => $imageSource,
+            'regions' => 'co'
+        );
+
+        $ch = curl_init('https://api.platerecognizer.com/v1/plate-reader/');
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($ch, CURLINFO_HEADER_OUT, true);
+        curl_setopt($ch, CURLOPT_POST, true);
+        curl_setopt($ch, CURLOPT_POSTFIELDS, $data);
+        curl_setopt($ch, CURLOPT_HTTP_VERSION, CURL_HTTP_VERSION_2TLS);
+
+        curl_setopt($ch, CURLOPT_HTTPHEADER, array(
+                "Authorization: Token 1fe80ebd207b100fee88fa12091de7aac77f56d3"  //API KEY
+            )
+        );
+
+        $result = curl_exec($ch);
+//        print_r($result);
+
+        curl_close($ch);
+        return $result;
+
+    }
+
 
 }
