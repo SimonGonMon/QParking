@@ -142,7 +142,13 @@ class ServiceController extends Controller
         dump($payResponse);
 
 //        if key titleResponse == Error return with error with string key textResponse
-        if (json_decode($payResponse, true)['titleResponse'] == 'Error') {
+
+//        if title_response exists then, if doesnt exist do nothing (make this not to trigger an exception)
+
+
+
+
+        if (json_decode($payResponse, true)['title_response'] == 'Error') {
             return back()->with('error', "API Error");
         }
 
