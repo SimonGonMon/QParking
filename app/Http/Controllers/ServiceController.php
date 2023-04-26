@@ -42,6 +42,7 @@ class ServiceController extends Controller
     public function registerVehicleFile(Request $request) {
         // Obtener la placa ingresada por el usuario desde la solicitud HTTP
         $rawImage = $request->file('plate-image');
+        dump($rawImage);
         $imageType = $rawImage->getMimeType();
 
         $rawImageContents = file_get_contents($rawImage);
@@ -51,9 +52,9 @@ class ServiceController extends Controller
 
         dump($plateRecognizerResponse);
 
-        if (empty(json_decode($plateRecognizerResponse, true)['results'])) {
-            return back()->with('error', 'No se pudo reconocer la placa. Por favor, intente de nuevo.');
-        }
+//        if (empty(json_decode($plateRecognizerResponse, true)['results'])) {
+//            return back()->with('error', 'No se pudo reconocer la placa. Por favor, intente de nuevo.');
+//        }
 
         $recognizedPlate = json_decode($plateRecognizerResponse, true)['results'][0]['plate'];
         $recognizedPlateScore = json_decode($plateRecognizerResponse, true)['results'][0]['score'];
