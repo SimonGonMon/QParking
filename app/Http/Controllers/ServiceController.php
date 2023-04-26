@@ -25,10 +25,8 @@ class ServiceController extends Controller
 
         // Si la consulta anterior retorna una entrada, significa que el vehículo ya está estacionado. En ese caso, retornar un error.
         if ($service) {
-
             return back()->with('error', 'Este vehículo ya se encuentra estacionado.');
         }
-
 
         // Si no se encuentra ninguna entrada en la tabla services con la misma placa, se puede insertar una nueva entrada en la tabla.
         $service = new Service;
@@ -46,18 +44,12 @@ class ServiceController extends Controller
         $rawImage = $request->file('plate-image');
         $imageType = $rawImage->getMimeType();
 
-//        get file name and then delete it
-
-
-
         $rawImageContents = file_get_contents($rawImage);
         $encodedImage = 'data:' . $imageType . ';base64,' . base64_encode($rawImageContents);
 
         $plateRecognizerResponse = $this->API_PlateRecognizer($encodedImage);
 
         dump($plateRecognizerResponse);
-
-//        check if array is empty
 
         if (empty(json_decode($plateRecognizerResponse, true)['results'])) {
             return back()->with('error', 'No se pudo reconocer la placa. Por favor, intente de nuevo.');
@@ -68,7 +60,7 @@ class ServiceController extends Controller
         $recognizedPlate = strtoupper($recognizedPlate);
 
         if ($recognizedPlateScore <= 0.5) {
-            return back()->with('error', 'No se pudo reconocer la placa. Por favor, intente de nuevo. - RESPUESTA API - Placa: ' . $plateRecognizerResponse.' - Confiabilidad Predicción: ' . $recognizedPlateScore);
+            return back()->with('error', 'No se pudo reconocer la placa. Por favor, intente de nuevo. - RESPUESTA API: (' . $plateRecognizerResponse.',' . $recognizedPlateScore.')');
         }
 
 
@@ -89,35 +81,7 @@ class ServiceController extends Controller
         $service->time_start = now();
         $service->save();
 
-        return back()->with('success', 'Vehículo registrado exitosamente. - Placa: ' . $recognizedPlate .' - Fecha y Hora: ' . now().' - Confiabilidad Predicción: ' . $recognizedPlateScore);
-
-
-
-
-
-
-
-
-        // Verificar si existe una entrada en la tabla services con la misma placa
-//        $service = Service::where('plate', $plate)->first();
-//
-//        // Si la consulta anterior retorna una entrada, significa que el vehículo ya está estacionado. En ese caso, retornar un error.
-//        if ($service) {
-//
-//            return back()->with('error', 'Este vehículo ya se encuentra estacionado.');
-//        }
-//
-//
-//        // Si no se encuentra ninguna entrada en la tabla services con la misma placa, se puede insertar una nueva entrada en la tabla.
-//        $service = new Service;
-//        $service->user_id = $request->input('user_id');
-//        $service->plate = $plate;
-//        $service->status = "active";
-//        $service->time_start = now();
-//        $service->save();
-//
-//        return back()->with('success', 'Vehículo registrado exitosamente.');
-
+        return back()->with('success', 'Vehículo registrado exitosamente. (' . $recognizedPlate .'-' . now().'-' . $recognizedPlateScore.')');
     }
 
     public function generatePayment(Request $request)
@@ -221,15 +185,6 @@ class ServiceController extends Controller
 
         $payResponse = $this->API_ePaycoGenerateLink($title, $description, $price);
 
-//        dump($payResponse);
-
-//        if key titleResponse == Error return with error with string key textResponse
-
-//        if title_response exists then, if doesnt exist do nothing (make this not to trigger an exception)
-
-
-
-
         if (json_decode($payResponse, true)['title_response'] == 'Error') {
             return back()->with('error', "API Error");
         }
@@ -321,14 +276,7 @@ class ServiceController extends Controller
         $response = curl_exec($curl);
 
         curl_close($curl);
-        //echo $response;
-
-
-        // alert response
-        //echo "<script>alert('$response');</script>";
-
         return $response;
-
     }
 
     public function API_PlateRecognizer($imageSource) {
@@ -356,6 +304,4 @@ class ServiceController extends Controller
         return $result;
 
     }
-
-
 }
