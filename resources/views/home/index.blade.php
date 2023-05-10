@@ -16,4 +16,17 @@
 {{--            <p class="lead">Your viewing the home page. Please login to view the restricted data.</p>--}}
 {{--        @endguest--}}
     </div>
+
+    <div class="bg-light p-5 rounded antialised">
+
+        <x-maps-google
+            :centerPoint="['lat' => 6.1644936, 'long' => -75.4850299]"
+            :zoomLevel="11"
+            :markers="[ ['lat' => 6.1644936, 'long' => -75.4850299,'title' => 'Perico'],['lat' => 6.1533953, 'long' => -75.5379501, 'title' => 'El Almorzadero de Chepo'], ['lat' => 6.151288, 'long' => -75.6170747, 'title' => 'Casa de Osama Bin Laden'] ]">
+
+        </x-maps-google>
+
+    </div>
+
+
 @endsection
