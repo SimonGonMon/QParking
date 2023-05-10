@@ -58,7 +58,8 @@
     </div>
 
     {{--    Modal Registrar Vehículo (archivo)--}}
-    <div class="modal fade" id="modal-register-file" tabindex="-1" aria-labelledby="modal-register-file" aria-hidden="true">
+    <div class="modal fade" id="modal-register-file" tabindex="-1" aria-labelledby="modal-register-file"
+         aria-hidden="true">
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
@@ -78,7 +79,8 @@
 
                         <div class="mb-3">
                             <label for="plate" class="form-label">Placa Vehicular</label>
-                            <input type="file" class="form-control" id="plate-image" name="plate-image" accept=".png,.jpg"  required >
+                            <input type="file" class="form-control" id="plate-image" name="plate-image"
+                                   accept=".png,.jpg" required>
                         </div>
                     </div>
                     <div class="modal-footer">
@@ -132,49 +134,56 @@
 
 
     @if(session('data'))
-        <h1 class="mt-5">Resultado Consulta</h1>
-        <hr>
-        <table class="table">
-            <thead>
-            <tr>
-                <th scope="col">Placa</th>
-                <th scope="col">Fecha Ingreso</th>
-                <th scope="col">Tiempo Transcurrido</th>
-                <th scope="col">Fecha Salida</th>
-                <th scope="col">Valor Cobro</th>
-            </tr>
-            </thead>
-            <tbody>
-            <tr>
-                <td>{{ session('data')['plate'] }}</td>
-                <td>{{ session('data')['start_time'] }}</td>
-                <td>{{ session('data')['elapsed_time'] }}</td>
-                <td>{{ session('data')['end_time'] }}</td>
-                <td>{{ session('data')['cost'] }}</td>
-            </tr>
-            </tbody>
-        </table>
+        <section class='p-6'>
+            <h1 class="mt-5">Resultado Consulta</h1>
+            <hr>
+            <table class="table">
+                <thead>
+                <tr>
+                    <th scope="col">Placa</th>
+                    <th scope="col">Fecha Ingreso</th>
+                    <th scope="col">Tiempo Transcurrido</th>
+                    <th scope="col">Fecha Salida</th>
+                    <th scope="col">Valor Cobro</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr>
+                    <td>{{ session('data')['plate'] }}</td>
+                    <td>{{ session('data')['start_time'] }}</td>
+                    <td>{{ session('data')['elapsed_time'] }}</td>
+                    <td>{{ session('data')['end_time'] }}</td>
+                    <td>{{ session('data')['cost'] }}</td>
+                </tr>
+                </tbody>
+            </table>
 
-        <form method="POST" action="{{ route('services.generate-qr') }}">
-            @csrf
-            <input type="hidden" name="plate" value="{{ session('data')['plate'] }}">
-            <input type="hidden" name="start_time" value="{{ session('data')['start_time'] }}">
-            <input type="hidden" name="elapsed_time" value="{{ session('data')['elapsed_time'] }}">
-            <input type="hidden" name="end_time" value="{{ session('data')['end_time'] }}">
-            <input type="hidden" name="cost" value="{{ session('data')['cost'] }}">
-            <button type="submit" class="btn btn-primary" id="generarQR">Generar QR</button>
-        </form>
+            <form method="POST" action="{{ route('services.generate-qr') }}">
+                @csrf
+                <input type="hidden" name="plate" value="{{ session('data')['plate'] }}">
+                <input type="hidden" name="start_time" value="{{ session('data')['start_time'] }}">
+                <input type="hidden" name="elapsed_time" value="{{ session('data')['elapsed_time'] }}">
+                <input type="hidden" name="end_time" value="{{ session('data')['end_time'] }}">
+                <input type="hidden" name="cost" value="{{ session('data')['cost'] }}">
+                <button type="submit" class="btn btn-primary" id="generarQR">Generar QR</button>
+            </form>
+
+        </section>
+
     @endif
 
     @if(session('routeQr'))
-        <h1 class="mt-5">QR de Pago</h1>
-        <hr>
-        <div class="d-flex justify-content-center">
-            <img src="{{ session('routeQr') }}" alt="QR de Pago">
-        </div>
+        <section class="p-6">
+            <h1 class="mt-5">QR de Pago</h1>
+            <hr>
+            <div class="d-flex justify-content-center">
+                <img src="{{ session('routeQr') }}" alt="QR de Pago">
+            </div>
+        </section>
 
 
-{{--        add the image in a div  aligned to the center with a little gap --}}
+
+        {{--        add the image in a div  aligned to the center with a little gap --}}
     @endif
 
     @if(session('data'))
@@ -184,6 +193,10 @@
     @if(session('routeQr'))
         {{ session()->forget('routeQr') }}
     @endif
+
+    <footer class="py-5 bg-dark">
+        <div class="container px-5"><p class="m-0 text-center text-white">QParking &copy; {{date('Y')}}</p></div>
+    </footer>
 @endsection
 
 @push('scripts')
