@@ -5,8 +5,7 @@ name: Build and deploy container app to Azure Web App - qparking
 
 on:
   push:
-    branches:
-      - main-laravel
+    tags: ["v*.*.*"]
   workflow_dispatch:
 
 jobs:
