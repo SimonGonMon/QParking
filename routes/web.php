@@ -44,6 +44,8 @@ Route::group(['namespace' => 'App\Http\Controllers'], function()
         Route::get('/profile', 'ProfileController@index')->name('profile.index');
         Route::post('/profile/getQR', 'ProfileController@getQR')->name('profile.getQR');
 
+        Route::post('/services/checkCobroBolsillo', 'ServiceController@checkCobroBolsillo')->name('services.checkCobroBolsillo');
+
         Route::post('/services/register', 'ServiceController@registerVehicle')->name('services.register');
 
         Route::post('/services/register-file', 'ServiceController@registerVehicleFile')->name('services.register-file');

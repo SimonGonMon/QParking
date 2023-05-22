@@ -4,8 +4,11 @@ namespace App\Http\Controllers;
 
 use App\Models\Transaction;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 use App\Models\Service;
+
 
 class ServiceController extends Controller
 {
@@ -17,7 +20,7 @@ class ServiceController extends Controller
         // Obtener la placa ingresada por el usuario desde la solicitud HTTP
         $plate = $request->input('plate');
 
-//        uppercase the plate
+        //        uppercase the plate
         $plate = strtoupper($plate);
 
         // Verificar si existe una entrada en la tabla services con la misma placa
@@ -36,10 +39,11 @@ class ServiceController extends Controller
         $service->time_start = now();
         $service->save();
 
-        return back()->with('success', 'Vehículo registrado exitosamente. - Placa: ' . $plate .' - Fecha y Hora: ' . now());
+        return back()->with('success', 'Vehículo registrado exitosamente. - Placa: ' . $plate . ' - Fecha y Hora: ' . now());
     }
 
-    public function registerVehicleFile(Request $request) {
+    public function registerVehicleFile(Request $request)
+    {
         // Obtener la placa ingresada por el usuario desde la solicitud HTTP
         $rawImage = $request->file('plate-image');
 
@@ -56,7 +60,7 @@ class ServiceController extends Controller
         if (empty(json_decode($plateRecognizerResponse, true)['results'])) {
             return back()->with('error', 'No se pudo reconocer la placa. Por favor, intente de nuevo.');
         }
-        
+
         if (array_key_exists('error', json_decode($plateRecognizerResponse, true))) {
             return back()->with('error', 'Archivo sobrepasa el tamaño máximo permitido. Por favor, intente de nuevo.');
         }
@@ -66,7 +70,7 @@ class ServiceController extends Controller
         $recognizedPlate = strtoupper($recognizedPlate);
 
         if ($recognizedPlateScore <= 0.5) {
-            return back()->with('error', 'No se pudo reconocer la placa. Por favor, intente de nuevo. - RESPUESTA API: (' . $plateRecognizerResponse.',' . $recognizedPlateScore.')');
+            return back()->with('error', 'No se pudo reconocer la placa. Por favor, intente de nuevo. - RESPUESTA API: (' . $plateRecognizerResponse . ',' . $recognizedPlateScore . ')');
         }
 
 
@@ -87,7 +91,7 @@ class ServiceController extends Controller
         $service->time_start = now();
         $service->save();
 
-        return back()->with('success', 'Vehículo registrado exitosamente. (' . $recognizedPlate .'-' . now().'-' . $recognizedPlateScore.')');
+        return back()->with('success', 'Vehículo registrado exitosamente. (' . $recognizedPlate . '-' . now() . '-' . $recognizedPlateScore . ')');
     }
 
     public function generatePayment(Request $request)
@@ -95,7 +99,7 @@ class ServiceController extends Controller
         // Obtener la placa ingresada por el usuario desde la solicitud HTTP
         $plate = $request->input('plate');
 
-//        uppercase the plate
+        //        uppercase the plate
         $plate = strtoupper($plate);
 
         // Verificar si existe una entrada en la tabla services con la misma placa
@@ -106,10 +110,10 @@ class ServiceController extends Controller
             return back()->with('error', 'No se encontró un servicio para la placa ingresada.');
         }
 
-//        check in table transactions if theres an entry with a pending status with the same plate
+        //        check in table transactions if theres an entry with a pending status with the same plate
         $transaction = Transaction::where('license_plate', $plate)->where('status', 'pending')->first();
 
-//        save the info into another data array with the transaction info if $transaction is not null
+        //        save the info into another data array with the transaction info if $transaction is not null
 
         if ($transaction) {
             $data = [
@@ -124,7 +128,7 @@ class ServiceController extends Controller
 
             $this->data = $data;
 
-//        guarda el arreglo en una variable de sesion para ser usada en la vista
+            //        guarda el arreglo en una variable de sesion para ser usada en la vista
             $request->session()->put('data', $data);
 
             return redirect()->route('dashboard.index');
@@ -150,10 +154,10 @@ class ServiceController extends Controller
             'cost' => $cost
         ];
 
-//        set the same values for the class data variable
+        //        set the same values for the class data variable
         $this->data = $data;
 
-//        guarda el arreglo en una variable de sesion para ser usada en la vista
+        //        guarda el arreglo en una variable de sesion para ser usada en la vista
         $request->session()->put('data', $data);
 
         return redirect()->route('dashboard.index');
@@ -175,10 +179,10 @@ class ServiceController extends Controller
             'cost' => $price,
         ];
 
-//        check in the table transactions if theres a transaction with the same license plate and status 'pending'
+        //        check in the table transactions if theres a transaction with the same license plate and status 'pending'
         $transaction = Transaction::where('license_plate', $licensePlate)->where('status', 'pending')->first();
 
-//        if theres a transactions found then get the value of qr_code and save it to session
+        //        if theres a transactions found then get the value of qr_code and save it to session
         if ($transaction) {
             $request->session()->put('routeQr', $transaction->qr_code);
             $request->session()->put('data', $data);
@@ -198,7 +202,7 @@ class ServiceController extends Controller
         $invoiceNumber = json_decode($payResponse, true)['data']['invoceNumber'];
         $routeQr = json_decode($payResponse, true)['data']['routeQr'];
 
-//        save transaction to database
+        //        save transaction to database
         $transaction = new Transaction;
         $transaction->license_plate = $licensePlate;
         $transaction->reference = $invoiceNumber;
@@ -217,7 +221,78 @@ class ServiceController extends Controller
         $request->session()->put('data', $data);
 
         return redirect()->route('dashboard.index');
+    }
 
+    public function checkCobroBolsillo(Request $request)
+    {
+        Log::debug('checkCobroBolsillo');
+
+        $user = auth()->user();
+        $pdo = DB::connection()->getPdo();
+    
+
+        // Get the cost value from the request body
+        $cost = $request->input('amount');
+        $plate = $request->input('plate');
+        $start_time = $request->input('start_time');
+        $end_time = $request->input('end_time');
+        $elapsed_time = $request->input('elapsed_time');
+
+        //        uppercase the plate
+        $plate = strtoupper($plate);
+
+        // check the user balance
+
+        // check in the database of services if services.user_id is equal to the users.id, if doesnt exist return error
+        $service = Service::where('user_id', $user->username)->where('plate', $plate)->first();
+
+        Log::debug('user id: ' . $user->username);
+
+        if (!$service) {
+            Log::debug('No se encontró el vehículo.');
+            return response()->json(['success' => false, 'message' => 'No se encontró relación entre el vehículo y el usuario.']);
+        }
+
+        if ($user->balance < $cost) {
+            Log::debug('Saldo Insuficiente.');
+            return response()->json(['success' => false, 'message' => 'Saldo Insuficiente.']);
+        }
+
+        Log::debug('user balance: ' . $user->balance);
+
+        // decrease the amount from the user balance in the database and delete the service using pdo
+        $newBalance = $user->balance - $cost;
+
+        Log::debug('newBalance: ' . $newBalance);
+
+        print($newBalance);
+
+        $stmt = $pdo->prepare("UPDATE users SET balance = ? WHERE username = ?");
+        $stmt->execute([$newBalance, $user->username]);
+        
+
+
+        $stmt = $pdo->prepare("DELETE FROM services WHERE user_id = ? AND plate = ?");
+        $stmt->execute([$user->username, $plate]);
+
+        Log::debug('service deleted');
+
+        //        save the transaction to the database
+        $transaction = new Transaction;
+        $transaction->license_plate = $plate;
+        $transaction->reference = 'Bolsillo';
+        $transaction->amount = $cost;
+        $transaction->status = 'paid';
+        $transaction->time_start = $start_time;
+        $transaction->time_end = $end_time;
+        $transaction->elapsed_time = $elapsed_time;
+        $transaction->qr_code= 'Bolsillo';
+        $transaction->save();
+
+
+
+
+        return response()->json(['success' => true, 'message' => 'Cobro realizado con éxito.']);
     }
 
     public function API_ePaycoGetApiToken()
@@ -285,7 +360,8 @@ class ServiceController extends Controller
         return $response;
     }
 
-    public function API_PlateRecognizer($imageSource) {
+    public function API_PlateRecognizer($imageSource)
+    {
         $data = array(
             'upload' => $imageSource,
             'regions' => 'co'
@@ -298,16 +374,18 @@ class ServiceController extends Controller
         curl_setopt($ch, CURLOPT_POSTFIELDS, $data);
         curl_setopt($ch, CURLOPT_HTTP_VERSION, CURL_HTTP_VERSION_2TLS);
 
-        curl_setopt($ch, CURLOPT_HTTPHEADER, array(
+        curl_setopt(
+            $ch,
+            CURLOPT_HTTPHEADER,
+            array(
                 "Authorization: Token 1fe80ebd207b100fee88fa12091de7aac77f56d3"  //API KEY
             )
         );
 
         $result = curl_exec($ch);
-//        print_r($result);
+        //        print_r($result);
 
         curl_close($ch);
         return $result;
-
     }
 }
