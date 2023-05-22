@@ -9,6 +9,14 @@
     <!-- Core theme CSS (includes Bootstrap)-->
     <link href="css/styles.css" rel="stylesheet"/>
 
+    <link rel="stylesheet" href="/assets/bootstrap/css/bootstrap.min.css">
+    <link rel="stylesheet" href="/assets/css/custom.css">
+
+    <!-- Other head elements -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+    <meta name="csrf-token" content="{{ csrf_token() }}" />
+
     <title>QParking</title>
 
     <!-- Bootstrap core CSS -->
