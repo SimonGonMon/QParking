@@ -41,6 +41,8 @@ Route::group(['namespace' => 'App\Http\Controllers'], function()
          */
         Route::get('/logout', 'LogoutController@perform')->name('logout.perform');
         Route::get('/dashboard', 'DashboardController@index')->name('dashboard.index');
+        Route::get('/profile', 'ProfileController@index')->name('profile.index');
+        Route::post('/profile/getQR', 'ProfileController@getQR')->name('profile.getQR');
 
         Route::post('/services/register', 'ServiceController@registerVehicle')->name('services.register');
 
@@ -49,7 +51,5 @@ Route::group(['namespace' => 'App\Http\Controllers'], function()
         Route::post('/services/generate-payment', 'ServiceController@generatePayment')->name('services.generate-payment');
 
         Route::post('/services/generate-qr', 'ServiceController@generateQR')->name('services.generate-qr');
-
-
     });
 });

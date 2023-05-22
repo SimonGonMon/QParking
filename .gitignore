@@ -16,3 +16,4 @@ yarn-error.log
 /.vscode
 internalTesting.php
 .env
+.env.test
