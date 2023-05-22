@@ -122,54 +122,96 @@
     </div>
 </div>
 
-
-
-
-
 @if(session('error'))
-<div class="alert alert-danger">{{ session('error') }}</div>
+<div class="alert alert-danger d-inline-block mx-auto">{{ session('error') }}</div>
 @elseif(session('success'))
-<div class="alert alert-success">{{ session('success') }}</div>
+<div class="alert alert-success d-inline-block mx-auto">{{ session('success') }}</div>
 @endif
 
-
 @if(session('data'))
-<section class='p-6'>
-    <h1 class="mt-5">Resultado Consulta</h1>
-    <hr>
-    <table class="table">
-        <thead>
-            <tr>
-                <th scope="col">Placa</th>
-                <th scope="col">Fecha Ingreso</th>
-                <th scope="col">Tiempo Transcurrido</th>
-                <th scope="col">Fecha Salida</th>
-                <th scope="col">Valor Cobro</th>
-            </tr>
-        </thead>
-        <tbody>
-            <tr>
-                <td>{{ session('data')['plate'] }}</td>
-                <td>{{ session('data')['start_time'] }}</td>
-                <td>{{ session('data')['elapsed_time'] }}</td>
-                <td>{{ session('data')['end_time'] }}</td>
-                <td>{{ session('data')['cost'] }}</td>
-            </tr>
-        </tbody>
-    </table>
+<div class="container">
+    <section class='p-6'>
+        <div class="card">
+            <div class="card-body">
+                <h1 class="mt-5">Resultado Consulta</h1>
+                <hr>
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th scope="col">Placa</th>
+                            <th scope="col">Fecha Ingreso</th>
+                            <th scope="col">Tiempo Transcurrido</th>
+                            <th scope="col">Fecha Salida</th>
+                            <th scope="col">Valor Cobro</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>{{ session('data')['plate'] }}</td>
+                            <td>{{ session('data')['start_time'] }}</td>
+                            <td>{{ session('data')['elapsed_time'] }}</td>
+                            <td>{{ session('data')['end_time'] }}</td>
+                            <td>{{ session('data')['cost'] }}</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
 
-    <form method="POST" action="{{ route('services.generate-qr') }}">
-        @csrf
-        <input type="hidden" name="plate" value="{{ session('data')['plate'] }}">
-        <input type="hidden" name="start_time" value="{{ session('data')['start_time'] }}">
-        <input type="hidden" name="elapsed_time" value="{{ session('data')['elapsed_time'] }}">
-        <input type="hidden" name="end_time" value="{{ session('data')['end_time'] }}">
-        <input type="hidden" name="cost" value="{{ session('data')['cost'] }}">
-        <button type="submit" class="btn btn-primary" id="generarQR">Generar QR</button>
-        <button type="button" class="btn btn-secondary" id="cobroBolsillo">Cobro Bolsillo</button>
-    </form>
+        <script>
+            function checkCobroBolsillo() {
+                $('#cobroBolsillo').prop('disabled', true); // disable the button
+                // disable generarqR
+                $('#generarQR').prop('disabled', true); // disable the button
+                $('#cobroBolsillo').html('<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Cargando...'); // change button text
 
-</section>
+                $.ajaxSetup({
+                    headers: {
+                        'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                    }
+                });
+
+                $.ajax({
+                    url: "{{ route('services.checkCobroBolsillo') }}",
+                    type: "POST",
+                    data: {
+                        amount: "{{ session('data')['cost'] }}",
+                        plate: "{{ session('data')['plate'] }}",
+                        start_time: "{{ session('data')['start_time'] }}",
+                        elapsed_time: "{{ session('data')['elapsed_time'] }}",
+                        end_time: "{{ session('data')['end_time'] }}",
+                    },
+                    success: function(response) {
+                        alert("Alerta: " + response.message);
+                    },
+                    error: function(xhr) {
+                        alert("Error: " + xhr.statusText);
+                    },
+                    complete: function() {
+                        // enable the button and hide the spinning thing
+                        $("#cobroBolsillo").prop("disabled", false);
+                        $('#generarQR').prop('disabled', false);
+                        $("#cobroBolsillo").html("Cobro Bolsillo");
+                    }
+                });
+            }
+        </script>
+
+        <form method="POST" action="{{ route('services.generate-qr') }}">
+            @csrf
+            <input type="hidden" name="plate" value="{{ session('data')['plate'] }}">
+            <input type="hidden" name="start_time" value="{{ session('data')['start_time'] }}">
+            <input type="hidden" name="elapsed_time" value="{{ session('data')['elapsed_time'] }}">
+            <input type="hidden" name="end_time" value="{{ session('data')['end_time'] }}">
+            <input type="hidden" name="cost" value="{{ session('data')['cost'] }}">
+            <button type="submit" class="btn btn-primary" id="generarQR">Generar QR</button>
+            <button type="button" class="btn btn-secondary" id="cobroBolsillo" onclick="checkCobroBolsillo()">Cobro Bolsillo</button>
+        </form>
+
+
+
+    </section>
+</div>
 
 @endif
 
@@ -195,7 +237,7 @@
 {{ session()->forget('routeQr') }}
 @endif
 
-<footer class="py-5 bg-dark">
+<footer class="py-5 bg-dark mt-5">
     <div class="container px-5">
         <p class="m-0 text-center text-white">QParking &copy; {{date('Y')}}</p>
     </div>
