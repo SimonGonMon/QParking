@@ -122,11 +122,13 @@
     </div>
 </div>
 
-@if(session('error'))
-<div class="alert alert-danger d-inline-block mx-auto">{{ session('error') }}</div>
-@elseif(session('success'))
-<div class="alert alert-success d-inline-block mx-auto">{{ session('success') }}</div>
-@endif
+<div class="text-center">
+    @if(session('error'))
+    <div class="alert alert-danger d-inline-block mx-auto">{{ session('error') }}</div>
+    @elseif(session('success'))
+    <div class="alert alert-success d-inline-block mx-auto">{{ session('success') }}</div>
+    @endif
+</div>
 
 @if(session('data'))
 <div class="container">
@@ -151,7 +153,7 @@
                             <td>{{ session('data')['start_time'] }}</td>
                             <td>{{ session('data')['elapsed_time'] }}</td>
                             <td>{{ session('data')['end_time'] }}</td>
-                            <td>{{ session('data')['cost'] }}</td>
+                            <td>${{ number_format(session('data')['cost'], 0, ',', '.') }}</td>
                         </tr>
                     </tbody>
                 </table>
@@ -182,10 +184,13 @@
                         end_time: "{{ session('data')['end_time'] }}",
                     },
                     success: function(response) {
-                        alert("Alerta: " + response.message);
+                        alert(response.message); // display the message in an alert box
+                        location.reload();
                     },
-                    error: function(xhr) {
-                        alert("Error: " + xhr.statusText);
+                    error: function(xhr, status, error) {
+                        alert("Error: " + error + "\nStatus code: " + xhr.status + "\nStatus text: " + xhr.statusText + "\nResponse: " + xhr.responseText);
+                        // alert(xhr.responseText); // display the message in an alert box
+
                     },
                     complete: function() {
                         // enable the button and hide the spinning thing
