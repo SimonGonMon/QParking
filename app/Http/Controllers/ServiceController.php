@@ -39,7 +39,7 @@ class ServiceController extends Controller
         $service->time_start = now();
         $service->save();
 
-        return back()->with('success', 'Vehículo registrado exitosamente. - Placa: ' . $plate . ' - Fecha y Hora: ' . now());
+        return back()->with('success', 'Vehículo registrado exitosamente.<br>Placa: ' . $plate . '<br>Fecha y Hora: ' . now());
     }
 
     public function registerVehicleFile(Request $request)
@@ -229,7 +229,7 @@ class ServiceController extends Controller
 
         $user = auth()->user();
         $pdo = DB::connection()->getPdo();
-    
+
 
         // Get the cost value from the request body
         $cost = $request->input('amount');
@@ -250,12 +250,12 @@ class ServiceController extends Controller
 
         if (!$service) {
             Log::debug('No se encontró el vehículo.');
-            return response()->json(['success' => false, 'message' => 'No se encontró relación entre el vehículo y el usuario.']);
+            return response()->json(['message' => 'No se encontró relación entre el vehículo y el usuario']);
         }
 
         if ($user->balance < $cost) {
             Log::debug('Saldo Insuficiente.');
-            return response()->json(['success' => false, 'message' => 'Saldo Insuficiente.']);
+            return response()->json(['message' => 'Saldo Insuficiente']);
         }
 
         Log::debug('user balance: ' . $user->balance);
@@ -263,13 +263,10 @@ class ServiceController extends Controller
         // decrease the amount from the user balance in the database and delete the service using pdo
         $newBalance = $user->balance - $cost;
 
-        Log::debug('newBalance: ' . $newBalance);
-
-        print($newBalance);
 
         $stmt = $pdo->prepare("UPDATE users SET balance = ? WHERE username = ?");
         $stmt->execute([$newBalance, $user->username]);
-        
+
 
 
         $stmt = $pdo->prepare("DELETE FROM services WHERE user_id = ? AND plate = ?");
@@ -286,13 +283,11 @@ class ServiceController extends Controller
         $transaction->time_start = $start_time;
         $transaction->time_end = $end_time;
         $transaction->elapsed_time = $elapsed_time;
-        $transaction->qr_code= 'Bolsillo';
+        $transaction->qr_code = 'Bolsillo';
         $transaction->save();
 
 
-
-
-        return response()->json(['success' => true, 'message' => 'Cobro realizado con éxito.']);
+        return response()->json(['message' => 'Cobro Satisfactorio']);
     }
 
     public function API_ePaycoGetApiToken()
